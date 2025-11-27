@@ -1,5 +1,5 @@
-##🏨 Hotelaria API
-##Sistema Completo de Gestão Hoteleira
+## 🏨 Hotelaria API
+## Sistema Completo de Gestão Hoteleira
 
 Java • Spring Boot • PostgreSQL • Clean Architecture • DTOs • Validações
 
@@ -8,36 +8,36 @@ A Hotelaria API é uma solução backend moderna e escalável para gerenciamento
 🚧 Status: Em desenvolvimento ativo
 O projeto está evoluindo com novas features, incluindo autenticação, níveis de acesso e integração com Angular.
 
-🚀 Principais Funcionalidades
+## 🚀 Principais Funcionalidades
 👥 Gestão de Usuários
 
-Cadastro estruturado usando DTOs
+- Cadastro estruturado usando DTOs
 
-Perfis (admin / padrão)
+- Perfis (admin / padrão)
 
-Validação completa dos campos
+- Validação completa dos campos
 
-Estrutura pronta para JWT + RBAC
+- Estrutura pronta para JWT + RBAC
 
-🧍 Gestão de Clientes
+## 🧍 Gestão de Clientes
 
-Cadastro de hóspedes
+- Cadastro de hóspedes
 
-Listagem e busca por nome
+- Listagem e busca por nome
 
-🏨 Gestão de Quartos
+## 🏨 Gestão de Quartos
 
-Listar todos os quartos
+- Listar todos os quartos
 
-Visualizar quarto específico
+- Visualizar quarto específico
 
-Ocupar/Desocupar quartos
+- Ocupar/Desocupar quartos
 
-Status dinâmico: DISPONÍVEL / OCUPADO
+- Status dinâmico: DISPONÍVEL / OCUPADO
 
-Associação automática com cliente
+- Associação automática com cliente
 
-🧱 Tecnologias Utilizadas
+##  🧱 Tecnologias Utilizadas
 Backend
 
 Java 17
@@ -60,9 +60,9 @@ Build & Tools
 
 Maven
 
-REST API padrão
+## REST API padrão
 
-🏗️ Arquitetura & Boas Práticas
+## 🏗️ Arquitetura & Boas Práticas
 
 ✔️ Separação clara de camadas (Controller → Service → Repository → Entity)
 
@@ -78,7 +78,8 @@ REST API padrão
 
 ✔️ Código limpo, organizado e escalável
 
-📁 Estrutura do Projeto
+
+## 📁 Estrutura do Projeto
 src/main/java/com.hotelaria
 │
 ├── usuario
@@ -91,7 +92,7 @@ src/main/java/com.hotelaria
 ├── quarto
 └── controller
 
-⚙️ Como Executar o Projeto
+## ⚙️ Como Executar o Projeto
 1️⃣ Clonar o repositório
 git clone https://github.com/SEU-USUARIO/hotelaria-api.git
 
@@ -107,20 +108,33 @@ spring.jpa.show-sql=true
 mvn spring-boot:run
 
 📡 Endpoints Disponíveis (v1)
-🔐 Usuários
+
+## 🔐 Usuários
+
 Método	Endpoint	Descrição
+
 POST	/usuarios	Criar usuário
-🧍 Clientes
-Método	Endpoint	Descrição
-POST	/clientes	Criar cliente
-GET	/clientes	Listar clientes
-🏨 Quartos
-Método	Endpoint	Descrição
+
+## 🧍 Clientes
+- Método	Endpoint	Descrição
+
+- POST	/clientes	Criar cliente
+
+- GET	/clientes	Listar clientes
+
+## 🏨 Quartos
+- Método	Endpoint	Descrição
+
 GET	/quartos	Listar quartos
+
 GET	/quartos/{num}	Ver detalhes
+
 PUT	/quartos/ocupar	Ocupar quarto
+
 PUT	/quartos/desocupar/{num}	Desocupar quarto
-🧭 Roadmap de Evolução
+
+## 🧭 Roadmap de Evolução
+
 ✔️ Implementado
 
 🚀 CRUD de usuários
