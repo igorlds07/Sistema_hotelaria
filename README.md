@@ -1,64 +1,82 @@
-🏨 Hotelaria API — Sistema Completo de Gestão Hoteleira
+##🏨 Hotelaria API
+##Sistema Completo de Gestão Hoteleira
 
-✨ Java | Spring Boot | Clean Architecture | DTOs | Validações | PostgreSQL
+Java • Spring Boot • PostgreSQL • Clean Architecture • DTOs • Validações
 
-A Hotelaria API é um backend estruturado para gerenciamento completo de um sistema hoteleiro, permitindo o controle de usuários, clientes, quartos, ocupações e operações internas.
-Construída com foco em arquitetura limpa, modularidade, boas práticas de engenharia e expansão futura.
+A Hotelaria API é uma solução backend moderna e escalável para gerenciamento completo de operações hoteleiras, incluindo usuários, clientes, quartos e fluxo de ocupação.
 
 🚧 Status: Em desenvolvimento ativo
-As funcionalidades principais já estão implementadas, e novas capacidades — como autenticação, níveis de acesso, integração com Angular e dashboards administrativos — estão sendo evoluídas iterativamente.
+O projeto está evoluindo com novas features, incluindo autenticação, níveis de acesso e integração com Angular.
 
 🚀 Principais Funcionalidades
 👥 Gestão de Usuários
 
-Cadastro utilizando DTOs
+Cadastro estruturado usando DTOs
 
-Perfis (admin/usuário) — preparado para RBAC
+Perfis (admin / padrão)
 
 Validação completa dos campos
 
-Pronta para implementação de autenticação JWT
+Estrutura pronta para JWT + RBAC
 
 🧍 Gestão de Clientes
 
 Cadastro de hóspedes
 
-Busca por nome
+Listagem e busca por nome
 
 🏨 Gestão de Quartos
 
-Listagem geral e específica
+Listar todos os quartos
 
-Ocupação e desocupação
+Visualizar quarto específico
 
-Status automático: DISPONÍVEL / OCUPADO
+Ocupar/Desocupar quartos
 
-Associação entre cliente e quarto
+Status dinâmico: DISPONÍVEL / OCUPADO
+
+Associação automática com cliente
 
 🧱 Tecnologias Utilizadas
-Tecnologia	Finalidade
-Java 17	Linguagem base
-Spring Boot 3	Framework principal
-Spring Data JPA / Hibernate	Persistência
-Jakarta Validation	Validações
-Lombok	Redução de boilerplate
-PostgreSQL	Banco de dados
-Maven	Gerenciamento de dependências
-🏗️ Arquitetura e Boas Práticas
+Backend
 
-Arquitetura limpa com separação das camadas
+Java 17
 
-Uso de DTOs para segurança e organização
+Spring Boot 3
 
-Services com regras de negócio isoladas
+Spring Web
 
-Repository pattern com Spring Data
+Spring Data JPA / Hibernate
 
-Validações declarativas com @Valid
+Jakarta Validation
 
-Estrutura preparada para escalabilidade
+Lombok
 
-Código organizado e pronto para expandir para frontend Angular
+Banco de Dados
+
+PostgreSQL
+
+Build & Tools
+
+Maven
+
+REST API padrão
+
+🏗️ Arquitetura & Boas Práticas
+
+✔️ Separação clara de camadas (Controller → Service → Repository → Entity)
+
+✔️ DTOs para isolar o domínio
+
+✔️ Services focados em regra de negócio
+
+✔️ Repositórios seguindo o padrão JPA
+
+✔️ Validações robustas com @Valid
+
+✔️ Estrutura preparada para autenticação, documentação e expansão
+
+✔️ Código limpo, organizado e escalável
 
 📁 Estrutura do Projeto
 src/main/java/com.hotelaria
@@ -73,11 +91,11 @@ src/main/java/com.hotelaria
 ├── quarto
 └── controller
 
-⚙️ Como Executar
+⚙️ Como Executar o Projeto
 1️⃣ Clonar o repositório
 git clone https://github.com/SEU-USUARIO/hotelaria-api.git
 
-2️⃣ Configurar o banco no application.properties
+2️⃣ Configurar o application.properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/hotelaria
 spring.datasource.username=postgres
 spring.datasource.password=12345
@@ -85,10 +103,10 @@ spring.datasource.password=12345
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 
-3️⃣ Rodar o projeto
+3️⃣ Executar o projeto
 mvn spring-boot:run
 
-📡 Principais Endpoints (versão atual)
+📡 Endpoints Disponíveis (v1)
 🔐 Usuários
 Método	Endpoint	Descrição
 POST	/usuarios	Criar usuário
@@ -99,26 +117,30 @@ GET	/clientes	Listar clientes
 🏨 Quartos
 Método	Endpoint	Descrição
 GET	/quartos	Listar quartos
-GET	/quartos/{num}	Detalhes de um quarto
-PUT	/quartos/ocupar	Ocupar um quarto
-PUT	/quartos/desocupar/{num}	Liberar quarto
+GET	/quartos/{num}	Ver detalhes
+PUT	/quartos/ocupar	Ocupar quarto
+PUT	/quartos/desocupar/{num}	Desocupar quarto
 🧭 Roadmap de Evolução
+✔️ Implementado
 
-✔️ CRUD completo de usuários
-✔️ Cadastro e consulta de clientes
-✔️ Sistema de ocupação/desocupação
-✔️ DTOs e validação aplicada
+🚀 CRUD de usuários
 
-📌 Em desenvolvimento próximos ciclos
+🚀 CRUD de clientes
 
-Criptografia de senha (BCrypt)
+🚀 Ocupação e desocupação de quartos
 
-Autenticação e Autorização (JWT + roles)
+🚀 DTOs e validações
 
-Painel administrativo
+🔧 Em desenvolvimento
 
-Integração com Angular (frontend web)
+🔒 Autenticação e autorização (JWT)
 
-Documentação Swagger
+🛡️ Criptografia de senha (BCrypt)
 
-Deploy em nuvem
+📘 Documentação Swagger
+
+🖥️ Integração completa com Angular
+
+📊 Painel administrativo
+
+☁️ Deploy em nuvem
