@@ -33,4 +33,19 @@ public class QuartoService {
 
         return quarto.getId();
     }
+
+    public Integer desocuparQuarto(Integer numeroQuarto) {
+        QuartoEntity quarto = quartoRepository.findByRoom(numeroQuarto)
+                .orElseThrow(() -> new RuntimeException("Quarto não encontrado!"));
+
+        if (quarto.getStatusQuarto() == StatusQuarto.DISPONIVEL) {
+            throw new RuntimeException("O quarto N° " + numeroQuarto + " não está ocupado!");
+        }
+
+        quarto.setStatusQuarto(StatusQuarto.DISPONIVEL);
+        quarto.setOcupante(null);
+        quartoRepository.save(quarto);
+
+        return quarto.getId();
+    }
 }
