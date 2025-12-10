@@ -11,7 +11,7 @@ import lombok.Getter;
 @Data
 @Getter
 @Entity
-@AllArgsConstructor
+
 public class ClienteEntity {
 
     @Id
