@@ -1,8 +1,14 @@
 package com.hotelaria.quartos.model.entity.dto;
 
+import com.hotelaria.quartos.model.entity.StatusQuarto;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Data
 public class QuartoOcuparDto {
-    private Integer idCliente;
+    private Integer numeroQuarto;
+    private String nomeCliente;
+    private LocalDateTime dataHoraEntrada;
+    private StatusQuarto status;
 }
