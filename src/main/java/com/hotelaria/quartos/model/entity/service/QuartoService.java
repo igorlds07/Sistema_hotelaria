@@ -6,6 +6,8 @@ import com.hotelaria.quartos.model.entity.QuartoEntity;
 import com.hotelaria.quartos.model.entity.StatusQuarto;
 import com.hotelaria.quartos.model.entity.dto.QuartoOcuparDto;
 import com.hotelaria.quartos.model.entity.dto.QuartoResponseDto;
+import com.hotelaria.quartos.model.entity.exceptions.BusinessException;
+import com.hotelaria.quartos.model.entity.exceptions.NotFoundException;
 import com.hotelaria.quartos.model.entity.repository.QuartoRepository;
 import com.hotelaria.usuario.model.entity.UsuarioEntity;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -37,14 +39,14 @@ public class QuartoService {
     }
     public QuartoOcuparDto ocuparQuarto(Integer numero, Integer idCliente){
         QuartoEntity  quarto = quartoRepository.findByRoom(numero)
-                .orElseThrow(() -> new RuntimeException("Quarto não encontrado!"));
+                .orElseThrow(() -> new NotFoundException("Quarto não encontrado!"));
 
         if (quarto.getStatusQuarto() == StatusQuarto.OCUPADO){
             throw new RuntimeException("O quarto N°" + numero + " está ocupado!");
         }
 
         ClienteEntity cliente = clienteRepository.findById(idCliente)
-                        .orElseThrow(() -> new RuntimeException("Cliente não enontrado!"));
+                        .orElseThrow(() -> new NotFoundException("Cliente não enontrado!"));
 
 
         quarto.setStatusQuarto(StatusQuarto.OCUPADO);
@@ -55,7 +57,6 @@ public class QuartoService {
 
         QuartoOcuparDto dto = new QuartoOcuparDto();
         dto.setNumeroQuarto(quarto.getNumeroQuarto());
-        dto.setNomeCliente(quarto.getOcupante().getNome());
         dto.setStatus(quarto.getStatusQuarto());
         dto.setDataHoraEntrada(quarto.getDataHoraEntrada());
 
@@ -64,10 +65,10 @@ public class QuartoService {
 
     public Integer desocuparQuarto(Integer numeroQuarto) {
         QuartoEntity quarto = quartoRepository.findByRoom(numeroQuarto)
-                .orElseThrow(() -> new RuntimeException("Quarto não encontrado!"));
+                .orElseThrow(() -> new NotFoundException("Quarto não encontrado!"));
 
         if (quarto.getStatusQuarto() == StatusQuarto.DISPONIVEL) {
-            throw new RuntimeException("O quarto N° " + numeroQuarto + " não está ocupado!");
+            throw new BusinessException("O quarto N° " + numeroQuarto + " não está ocupado!");
         }
 
         LocalDateTime saida = LocalDateTime.now();
@@ -100,7 +101,7 @@ public class QuartoService {
     }
     public QuartoResponseDto buscarQuartoEspecifio(Integer numQuarto){
         QuartoEntity quarto = quartoRepository.findByRoom(numQuarto)
-                .orElseThrow(() -> new RuntimeException("Quarto não encontrado"));
+                .orElseThrow(() -> new NotFoundException("Quarto não encontrado"));
         return toResponse(quarto);
     }
 }
