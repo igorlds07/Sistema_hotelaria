@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface QuartoRepository extends JpaRepository<QuartoEntity, Integer> {
 
-    Optional<QuartoEntity> findByRoom (Integer numero);
+    Optional<QuartoEntity> findByNumeroQuarto (Integer numeroQuarto);
 
 }
