@@ -6,11 +6,9 @@ import com.hotelaria.quartos.model.entity.QuartoEntity;
 import com.hotelaria.quartos.model.entity.StatusQuarto;
 import com.hotelaria.quartos.model.entity.dto.QuartoOcuparDto;
 import com.hotelaria.quartos.model.entity.dto.QuartoResponseDto;
-import com.hotelaria.quartos.model.entity.exceptions.BusinessException;
-import com.hotelaria.quartos.model.entity.exceptions.NotFoundException;
+import com.hotelaria.exceptions.BusinessException;
+import com.hotelaria.exceptions.NotFoundException;
 import com.hotelaria.quartos.model.entity.repository.QuartoRepository;
-import com.hotelaria.usuario.model.entity.UsuarioEntity;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +36,7 @@ public class QuartoService {
         }
     }
     public QuartoOcuparDto ocuparQuarto(Integer numero, Integer idCliente){
-        QuartoEntity  quarto = quartoRepository.findByRoom(numero)
+        QuartoEntity  quarto = quartoRepository.findByNumeroQuarto(numero)
                 .orElseThrow(() -> new NotFoundException("Quarto não encontrado!"));
 
         if (quarto.getStatusQuarto() == StatusQuarto.OCUPADO){
@@ -64,7 +62,7 @@ public class QuartoService {
     }
 
     public Integer desocuparQuarto(Integer numeroQuarto) {
-        QuartoEntity quarto = quartoRepository.findByRoom(numeroQuarto)
+        QuartoEntity quarto = quartoRepository.findByNumeroQuarto(numeroQuarto)
                 .orElseThrow(() -> new NotFoundException("Quarto não encontrado!"));
 
         if (quarto.getStatusQuarto() == StatusQuarto.DISPONIVEL) {
@@ -100,7 +98,7 @@ public class QuartoService {
         return dto;
     }
     public QuartoResponseDto buscarQuartoEspecifio(Integer numQuarto){
-        QuartoEntity quarto = quartoRepository.findByRoom(numQuarto)
+        QuartoEntity quarto = quartoRepository.findByNumeroQuarto(numQuarto)
                 .orElseThrow(() -> new NotFoundException("Quarto não encontrado"));
         return toResponse(quarto);
     }
