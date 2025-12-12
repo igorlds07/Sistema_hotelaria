@@ -1,5 +1,6 @@
 package com.hotelaria.usuario.model.entity.service;
 
+import com.hotelaria.exceptions.NotFoundException;
 import com.hotelaria.usuario.model.entity.UsuarioEntity;
 import com.hotelaria.usuario.model.entity.dto.UsuarioRequestDto;
 import com.hotelaria.usuario.model.entity.dto.UsuarioResponseDto;
@@ -45,13 +46,27 @@ public class UsuarioService {
         }
         return response;
     }
+    public UsuarioResponseDto buscarUsuarios(Integer id){
+        UsuarioEntity usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
 
-    public Integer atualizar(Integer id, UsuarioEntity request){
+        UsuarioResponseDto response = new UsuarioResponseDto();
+        BeanUtils.copyProperties(usuario, response);
+
+        return response;
+    }
+
+    public UsuarioResponseDto atualizar(Integer id, UsuarioRequestDto request){
         UsuarioEntity user = usuarioRepository.findById(id).orElse(null);
 
         if (user != null){
             BeanUtils.copyProperties(user, request);
-            return usuarioRepository.save(request).getId();
+            UsuarioEntity usuarioAtualizado = usuarioRepository.save(user);
+
+            UsuarioResponseDto response = new UsuarioResponseDto();
+            BeanUtils.copyProperties(usuarioAtualizado, response);
+
+            return response;
         }
         return null;
 
