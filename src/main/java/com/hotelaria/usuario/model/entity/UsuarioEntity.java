@@ -1,11 +1,16 @@
 package com.hotelaria.usuario.model.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Entity
+@Table(name = "usuario_entity")
 public class UsuarioEntity {
 
     @Id

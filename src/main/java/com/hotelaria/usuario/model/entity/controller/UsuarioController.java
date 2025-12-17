@@ -19,6 +19,7 @@ public class UsuarioController {
 
     @PostMapping
     public ResponseEntity<UsuarioResponseDto> criarUsuario(@RequestBody UsuarioRequestDto request){
+        System.out.println("JSON recebido: " + request);
         UsuarioResponseDto usuario = usuarioService.criar(request);
         return ResponseEntity.ok(usuario);
     }

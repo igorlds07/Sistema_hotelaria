@@ -41,7 +41,7 @@ public class UsuarioService {
         List<UsuarioResponseDto> response = new ArrayList<>();
         for (UsuarioEntity e: entites){
             UsuarioResponseDto novo = new UsuarioResponseDto();
-            BeanUtils.copyProperties(entites, response);
+            BeanUtils.copyProperties(e, novo);
             response.add(novo);
         }
         return response;
@@ -57,18 +57,15 @@ public class UsuarioService {
     }
 
     public UsuarioResponseDto atualizar(Integer id, UsuarioRequestDto request){
-        UsuarioEntity user = usuarioRepository.findById(id).orElse(null);
+        UsuarioEntity user = usuarioRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Usuário não encontrado."));
+        BeanUtils.copyProperties(request, user, "id");
 
-        if (user != null){
-            BeanUtils.copyProperties(user, request);
-            UsuarioEntity usuarioAtualizado = usuarioRepository.save(user);
+        UsuarioEntity usuarioAtualizado = usuarioRepository.save(user);
 
-            UsuarioResponseDto response = new UsuarioResponseDto();
-            BeanUtils.copyProperties(usuarioAtualizado, response);
-
-            return response;
-        }
-        return null;
+        UsuarioResponseDto responseDto = new UsuarioResponseDto();
+        BeanUtils.copyProperties(usuarioAtualizado, responseDto);
+        return responseDto;
 
     }
     public Integer deletar(Integer id){

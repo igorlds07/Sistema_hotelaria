@@ -1,19 +1,19 @@
 package com.hotelaria.quartos.model.entity.service;
 
-import com.hotelaria.clientes.model.entity.ClienteEntity;
-import com.hotelaria.clientes.model.entity.repository.ClienteRepository;
-import com.hotelaria.quartos.model.entity.QuartoEntity;
-import com.hotelaria.quartos.model.entity.StatusQuarto;
-import com.hotelaria.quartos.model.entity.dto.QuartoOcuparDto;
-import com.hotelaria.quartos.model.entity.dto.QuartoResponseDto;
 import com.hotelaria.exceptions.BusinessException;
 import com.hotelaria.exceptions.NotFoundException;
+import com.hotelaria.quartos.model.entity.QuartoEntity;
+import com.hotelaria.quartos.model.entity.StatusQuarto;
+import com.hotelaria.quartos.model.entity.dto.QuartoRequestDto;
+import com.hotelaria.quartos.model.entity.dto.QuartoResponseDto;
 import com.hotelaria.quartos.model.entity.repository.QuartoRepository;
+import org.jspecify.annotations.Nullable;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -22,84 +22,75 @@ public class QuartoService {
     @Autowired
     private QuartoRepository quartoRepository;
 
-    @Autowired
-    private ClienteRepository clienteRepository;
+    public QuartoResponseDto criarQuarto(@RequestBody QuartoRequestDto request){
 
-    public void iniciarQuartos(){
-        if (quartoRepository.count() == 0){
-            for (int i = 0; i < 15; i++){
-                QuartoEntity quarto = new QuartoEntity();
-                quarto.setNumeroQuarto(i + 1);
-                quarto.setStatusQuarto(StatusQuarto.DISPONIVEL);
-                quartoRepository.save(quarto);
-            }
-        }
-    }
-    public QuartoOcuparDto ocuparQuarto(Integer numero, Integer idCliente){
-        QuartoEntity  quarto = quartoRepository.findByNumeroQuarto(numero)
-                .orElseThrow(() -> new NotFoundException("Quarto não encontrado!"));
-
-        if (quarto.getStatusQuarto() == StatusQuarto.OCUPADO){
-            throw new RuntimeException("O quarto N°" + numero + " está ocupado!");
+        if (quartoRepository.findByNumeroQuarto(request.getNumeroQuarto()).isPresent()){
+            throw new BusinessException("Esse quarto já existe!");
         }
 
-        ClienteEntity cliente = clienteRepository.findById(idCliente)
-                        .orElseThrow(() -> new NotFoundException("Cliente não enontrado!"));
+        QuartoResponseDto response = new QuartoResponseDto();
+        response.setNumeroQuarto(request.getNumeroQuarto());
+        response.setStatusQuarto(request.getStatusQuarto());
+        response.setOcupante(String.valueOf(request.getOcupante()));
 
-
-        quarto.setStatusQuarto(StatusQuarto.OCUPADO);
-        quarto.setOcupante(cliente);
-        quarto.setDataHoraEntrada(LocalDateTime.now());
-        quarto.setDataHoraSaida(null);
-        quartoRepository.save(quarto);
-
-        QuartoOcuparDto dto = new QuartoOcuparDto();
-        dto.setNumeroQuarto(quarto.getNumeroQuarto());
-        dto.setStatus(quarto.getStatusQuarto());
-        dto.setDataHoraEntrada(quarto.getDataHoraEntrada());
-
-        return dto;
+        return response;
     }
 
-    public Integer desocuparQuarto(Integer numeroQuarto) {
-        QuartoEntity quarto = quartoRepository.findByNumeroQuarto(numeroQuarto)
-                .orElseThrow(() -> new NotFoundException("Quarto não encontrado!"));
-
-        if (quarto.getStatusQuarto() == StatusQuarto.DISPONIVEL) {
-            throw new BusinessException("O quarto N° " + numeroQuarto + " não está ocupado!");
-        }
-
-        LocalDateTime saida = LocalDateTime.now();
-        quarto.setDataHoraSaida(saida);
-
-        if (quarto.getDataHoraEntrada() != null){
-            Duration duracao = Duration.between(quarto.getDataHoraEntrada(), saida);
-            long horas = duracao.toHours();
-        }
-
-        quarto.setStatusQuarto(StatusQuarto.DISPONIVEL);
-        quarto.setOcupante(null);
-        quartoRepository.save(quarto);
-
-        return quarto.getId();
+    public List<QuartoResponseDto> listarQuartos(){
+        return quartoRepository.findAll()
+                .stream()
+                .map(quarto -> {
+                    QuartoResponseDto response = new QuartoResponseDto();
+                    BeanUtils.copyProperties(quarto, response, "id");
+                    return response;
+                }).toList();
     }
-    public List<QuartoResponseDto> listarQuarto(){
-        return quartoRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
 
-    }
-    private QuartoResponseDto toResponse(QuartoEntity quarto){
-        QuartoResponseDto dto = new QuartoResponseDto();
-        dto.setNumeroQuarto(quarto.getNumeroQuarto());
-        dto.setStatusQuarto(quarto.getStatusQuarto());
-        dto.setOcupante(quarto.getOcupante() != null ? quarto.getOcupante().getNome() : "Nenhum");
 
-        return dto;
-    }
-    public QuartoResponseDto buscarQuartoEspecifio(Integer numQuarto){
+   public QuartoResponseDto buscarQuartoEspecifio(Integer numQuarto){
         QuartoEntity quarto = quartoRepository.findByNumeroQuarto(numQuarto)
                 .orElseThrow(() -> new NotFoundException("Quarto não encontrado"));
-        return toResponse(quarto);
+
+            QuartoResponseDto dto = new QuartoResponseDto();
+            dto.setNumeroQuarto(quarto.getNumeroQuarto());
+            dto.setStatusQuarto(quarto.getStatusQuarto());
+            dto.setOcupante(quarto.getOcupante() != null ? quarto.getOcupante().getNome() : "Nenhum");
+
+            return dto;
     }
+
+    public QuartoResponseDto atualizarQuarto(Integer numQuarto, QuartoRequestDto request){
+        QuartoEntity quarto = quartoRepository.findByNumeroQuarto(numQuarto)
+                .orElseThrow(() -> new NotFoundException("Quarto não encontrado!"));
+
+        BeanUtils.copyProperties(request, quarto, "id",
+                "statusQuarto",
+                "dataHoraEntrada",
+                "dataHoraSaida",
+                "ocupante");
+
+        QuartoEntity quartoAtualizado = quartoRepository.save(quarto);
+
+
+        QuartoResponseDto response = new QuartoResponseDto();
+        BeanUtils.copyProperties(quartoAtualizado, response);
+        return response;
+    }
+
+    public void deletar(Integer id){
+        QuartoEntity quarto = quartoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Quarto não encontrado!"));
+
+        if (quarto.getStatusQuarto() == StatusQuarto.OCUPADO) {
+            throw new BusinessException("Não é possível deletar um quarto ocupado.");
+        }
+
+        quartoRepository.delete(quarto);
+
+    }
+
+
+
 }
+
+
