@@ -72,7 +72,7 @@ public class OcuparQuartoService {
 
     public List<OcuparQuartoResponseDto> listarQuartosOcupados(){
         return ocuparQuartoRepository.findAll().stream().
-                map(ocuparQuartoEntity -> )
+                map(this::toResponse).toList();
     }
 
 
@@ -118,4 +118,21 @@ public class OcuparQuartoService {
 
         return valorFinal;
     }
+
+    private OcuparQuartoResponseDto toResponse(OcuparQuartoEntity ocupacao) {
+
+        OcuparQuartoResponseDto dto = new OcuparQuartoResponseDto();
+
+        dto.setId(ocupacao.getId());
+        dto.setStatusQuarto(ocupacao.getStatusQuarto());
+
+        dto.setNumeroQuarto(ocupacao.getQuarto().getNumeroQuarto());
+
+        dto.setDataHoraEntrada(ocupacao.getDataHoraEntrada());
+
+        dto.setOcupanteNome(ocupacao.getOcupante().getNome());
+
+        return dto;
+    }
+
 }
