@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,6 +43,7 @@ class OcuparQuartoServiceTest {
 
     @Mock
     private OcuparQuartoRepository ocuparQuartoRepository;
+
 
     private OcuparQuartoEntity ocuparQuartoEntity;
 
@@ -124,6 +127,55 @@ class OcuparQuartoServiceTest {
         verify(clienteRepository, never()).findById(any());
         verify(quartoRepository, never()).save(any());
         verify(ocuparQuartoRepository, never()).save(any());
+
+    }
+
+
+    @Test
+    void deveListarQuartosOcupados(){
+
+        // Arrange
+
+        QuartoEntity quarto = new QuartoEntity();
+        quarto.setId(1);
+        quarto.setNumeroQuarto(25);
+        quarto.setStatusQuarto(StatusQuarto.OCUPADO);
+
+        ClienteEntity cliente = new ClienteEntity();
+        cliente.setId(1);
+
+        OcuparQuartoEntity ocuparQuarto = new OcuparQuartoEntity();
+        ocuparQuarto.setQuarto(quarto);
+        ocuparQuarto.setOcupante(cliente);
+        ocuparQuarto.setDataHoraSaida(null);
+
+        // Act
+        when(ocuparQuartoRepository.findByDataHoraSaidaIsNull()).thenReturn(List.of(ocuparQuarto));
+
+        List<OcuparQuartoResponseDto> resultado = ocuparQuartoService.listarQuartosOcupados();
+
+        // Assert
+        
+        assertEquals(1, resultado.size());
+        assertEquals(25, resultado.get(0).getNumeroQuarto());
+        assertEquals(StatusQuarto.OCUPADO, resultado.get(0).getStatusQuarto());
+        assertEquals(cliente.getId(), resultado.get(0).getOcupanteId());
+
+        verify(ocuparQuartoRepository).findByDataHoraSaidaIsNull();
+
+    }
+
+    @Test
+    void deveRetornarUmaListaVazia_QuandoNaoHouverQuartosOcupados(){
+
+        when(ocuparQuartoRepository.findByDataHoraSaidaIsNull()).thenReturn(Collections.emptyList());
+
+        List<OcuparQuartoResponseDto> resultado = ocuparQuartoService.listarQuartosOcupados();
+
+        assertNotNull(resultado);
+        assertTrue(resultado.isEmpty());
+
+        verify(ocuparQuartoRepository).findByDataHoraSaidaIsNull();
 
     }
 }
