@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -155,7 +156,7 @@ class OcuparQuartoServiceTest {
         List<OcuparQuartoResponseDto> resultado = ocuparQuartoService.listarQuartosOcupados();
 
         // Assert
-        
+
         assertEquals(1, resultado.size());
         assertEquals(25, resultado.get(0).getNumeroQuarto());
         assertEquals(StatusQuarto.OCUPADO, resultado.get(0).getStatusQuarto());
@@ -176,6 +177,50 @@ class OcuparQuartoServiceTest {
         assertTrue(resultado.isEmpty());
 
         verify(ocuparQuartoRepository).findByDataHoraSaidaIsNull();
+
+    }
+
+    @Test
+    void deveDesocuparSeQuartoOcupado(){
+
+        int numeroQuarto = 25;
+
+        QuartoEntity quarto = new QuartoEntity();
+        quarto.setId(1);
+        quarto.setValorDiaria(new BigDecimal(150));
+        quarto.setStatusQuarto(StatusQuarto.OCUPADO);
+
+        ClienteEntity cliente = new ClienteEntity();
+        cliente.setId(1);
+        cliente.setNome("Teste");
+
+        OcuparQuartoEntity ocuparQuarto = new OcuparQuartoEntity();
+        ocuparQuarto.setQuarto(quarto);
+        ocuparQuarto.setOcupante(cliente);
+        ocuparQuarto.setDataHoraEntrada(LocalDateTime.now().minusHours(2));
+        ocuparQuarto.setDataHoraSaida(null);
+
+        when(quartoRepository.findByNumeroQuarto(numeroQuarto))
+                .thenReturn(Optional.of(quarto));
+
+        when(ocuparQuartoRepository.findByQuartoAndDataHoraSaidaIsNull(any(QuartoEntity.class)))
+                .thenReturn(Optional.of(ocuparQuarto));
+
+        when(ocuparQuartoRepository
+                .findFirstByQuarto_NumeroQuartoAndDataHoraSaidaIsNull(numeroQuarto))
+                .thenReturn(Optional.of(ocuparQuarto));
+
+        when(ocuparQuartoRepository.save(any(OcuparQuartoEntity.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+
+        when(quartoRepository.save(any(QuartoEntity.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+
+        BigDecimal valorFinal = ocuparQuartoService.desocuparQuarto(numeroQuarto);
+
+        assertNotNull(valorFinal);
+        assertEquals(StatusQuarto.DISPONIVEL, quarto.getStatusQuarto());
+
 
     }
 }
