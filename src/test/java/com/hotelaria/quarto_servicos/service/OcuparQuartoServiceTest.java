@@ -223,4 +223,113 @@ class OcuparQuartoServiceTest {
 
 
     }
+
+    @Test
+    void deveRetornarErro_AoNaoEncontrarUmQuartoAoDesocupar(){
+        Integer numQuarto = 25;
+
+        when(quartoRepository.findByNumeroQuarto(numQuarto)).thenReturn(Optional.empty());
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> ocuparQuartoService.desocuparQuarto(numQuarto));
+
+        assertEquals("Quarto não encontrado!", ex.getMessage());
+
+        verify(quartoRepository).findByNumeroQuarto(numQuarto);
+        verifyNoInteractions(ocuparQuartoRepository);
+    }
+
+    @Test
+    void deveRetornarBussinesException_SeQuartoNaoEstiverOcupado(){
+        Integer numeroQuarto = 25;
+
+        QuartoEntity quarto = new QuartoEntity();
+        quarto.setStatusQuarto(StatusQuarto.DISPONIVEL);
+        quarto.setNumeroQuarto(numeroQuarto);
+
+        when(quartoRepository.findByNumeroQuarto(quarto.getNumeroQuarto())).thenReturn(Optional.of(quarto));
+
+        when(ocuparQuartoRepository.findByQuartoAndDataHoraSaidaIsNull(quarto)).thenReturn(Optional.empty());
+
+        BusinessException ex = assertThrows(BusinessException.class,
+        () -> ocuparQuartoService.desocuparQuarto(25));
+
+        assertEquals("O Quarto " + quarto.getNumeroQuarto() + " não está ocupado!" , ex.getMessage() );
+
+        verify(quartoRepository).findByNumeroQuarto(numeroQuarto);
+        verify(ocuparQuartoRepository).findByQuartoAndDataHoraSaidaIsNull(quarto);
+        verify(ocuparQuartoRepository, never())
+                .findFirstByQuarto_NumeroQuartoAndDataHoraSaidaIsNull(anyInt());
+
+    }
+
+    @Test
+    void deveLancarBussinesException_SeNaoTiverOcupacaoAtiva(){
+
+        Integer numeroQuarto = 25;
+
+        QuartoEntity quarto = new QuartoEntity();
+        quarto.setNumeroQuarto(numeroQuarto);
+        quarto.setStatusQuarto(StatusQuarto.OCUPADO);
+
+        OcuparQuartoEntity ocuparQuarto = new OcuparQuartoEntity();
+        ocuparQuarto.setQuarto(quarto);
+        ocuparQuarto.setDataHoraSaida(null);
+
+        when(quartoRepository.findByNumeroQuarto(numeroQuarto)).thenReturn(Optional.of(quarto));
+
+        when(ocuparQuartoRepository.findByQuartoAndDataHoraSaidaIsNull(quarto)).thenReturn(Optional.of(ocuparQuarto));
+
+        when(ocuparQuartoRepository.findFirstByQuarto_NumeroQuartoAndDataHoraSaidaIsNull(numeroQuarto))
+                .thenReturn(Optional.empty());
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> ocuparQuartoService.desocuparQuarto(numeroQuarto));
+
+
+        assertEquals("Não existe ocupação ativa para o quarto N° " + numeroQuarto, ex.getMessage());
+
+        verify(quartoRepository).findByNumeroQuarto(numeroQuarto);
+        verify(ocuparQuartoRepository).findByQuartoAndDataHoraSaidaIsNull(quarto);
+        verify(ocuparQuartoRepository)
+                .findFirstByQuarto_NumeroQuartoAndDataHoraSaidaIsNull(numeroQuarto);
+
+        verify(quartoRepository, never()).save(any());
+        verify(ocuparQuartoRepository, never()).save(any());
+    }
+    @Test
+    void deveDesocuparQuartoComSucesso_cobrandoUmaDiaria() {
+        Integer numeroQuarto = 25;
+
+        QuartoEntity quarto = new QuartoEntity();
+        quarto.setNumeroQuarto(numeroQuarto);
+        quarto.setStatusQuarto(StatusQuarto.OCUPADO);
+        quarto.setValorDiaria(new BigDecimal("150.00"));
+
+        OcuparQuartoEntity ocupacao = new OcuparQuartoEntity();
+        ocupacao.setQuarto(quarto);
+        ocupacao.setDataHoraEntrada(LocalDateTime.now().minusHours(24));
+        ocupacao.setDataHoraSaida(null);
+
+        when(quartoRepository.findByNumeroQuarto(numeroQuarto))
+                .thenReturn(Optional.of(quarto));
+
+        when(ocuparQuartoRepository.findByQuartoAndDataHoraSaidaIsNull(quarto))
+                .thenReturn(Optional.of(ocupacao));
+
+        when(ocuparQuartoRepository
+                .findFirstByQuarto_NumeroQuartoAndDataHoraSaidaIsNull(numeroQuarto))
+                .thenReturn(Optional.of(ocupacao));
+
+        // Act
+        BigDecimal valor = ocuparQuartoService.desocuparQuarto(numeroQuarto);
+
+        // Assert
+        assertEquals(new BigDecimal("150.00"), valor);
+        assertEquals(StatusQuarto.DISPONIVEL, quarto.getStatusQuarto());
+        assertNotNull(ocupacao.getDataHoraSaida());
+
+        verify(ocuparQuartoRepository).save(ocupacao);
+        verify(quartoRepository).save(quarto);
+    }
 }
