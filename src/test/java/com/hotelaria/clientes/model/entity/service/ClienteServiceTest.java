@@ -5,11 +5,15 @@ import com.hotelaria.clientes.model.entity.dto.ClienteRequestDto;
 import com.hotelaria.clientes.model.entity.dto.ClienteResponseDto;
 import com.hotelaria.clientes.model.entity.repository.ClienteRepository;
 import com.hotelaria.exceptions.BusinessException;
+import com.hotelaria.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,6 +70,71 @@ class ClienteServiceTest {
 
         verify(clienteRepository, never()).save(any());
     }
+
+    @Test
+    void deveListarTodosOsClientes(){
+        ClienteEntity cliente = new ClienteEntity();
+        cliente.setNome("Nome Teste");
+        cliente.setCpf("03309145107");
+        cliente.setContato("96206502");
+
+        when(clienteRepository.findAll()).thenReturn(List.of(cliente));
+
+        List<ClienteResponseDto> response = clienteService.listar();
+
+        assertEquals(1, response.size());
+        assertEquals("Nome Teste", response.get(0).getNome());
+        assertEquals("96206502", response.get(0).getContato());
+
+        verify(clienteRepository).findAll();
+
+    }
+
+    @Test
+    void deveRetornarA_ListaVaziaQuandoNaoHouverClientes(){
+        when(clienteRepository.findAll()).thenReturn(List.of());
+
+        List<ClienteResponseDto> response = clienteService.listar();
+
+        assertNotNull(response);
+        assertTrue(response.isEmpty());
+
+        verify(clienteRepository).findAll();
+    }
+    @Test
+    void deveBuscarUmClientePorId(){
+
+        Integer id = 1;
+
+        ClienteEntity cliente = new ClienteEntity();
+        cliente.setNome("Nome Teste");
+        cliente.setId(id);
+
+        when(clienteRepository.findById(id)).thenReturn(Optional.of(cliente));
+
+        ClienteResponseDto response = clienteService.buscarPorId(id);
+
+        assertEquals(1, response.getId());
+        assertEquals("Nome Teste", response.getNome());
+
+        verify(clienteRepository).findById(id);
+
+    }
+    @Test
+    void deveLancarNotFoundException_quandoClienteNaoExistir() {
+        Integer id = 1;
+
+        when(clienteRepository.findById(id))
+                .thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> clienteService.buscarPorId(id));
+
+        verify(clienteRepository).findById(id);
+    }
+
+
+
 
 
 }
