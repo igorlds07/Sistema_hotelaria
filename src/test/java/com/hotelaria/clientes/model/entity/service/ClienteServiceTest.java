@@ -133,8 +133,77 @@ class ClienteServiceTest {
         verify(clienteRepository).findById(id);
     }
 
+    @Test
+    void deveBuscarE_AtualizarClienteEncontrado(){
+
+        Integer id = 1;
+
+        ClienteEntity clienteExistente = new ClienteEntity();
+        clienteExistente.setId(id);
+        clienteExistente.setNome("Nome Antigo");
+        clienteExistente.setCpf("03309145107");
+        clienteExistente.setContato("11111111");
+
+        ClienteRequestDto request = new ClienteRequestDto();
+        request.setNome("Nome Novo");
+        request.setCpf("03309145107");
+        request.setContato("99999999");
 
 
+        when(clienteRepository.findById(id)).thenReturn(Optional.of(clienteExistente));
+        when(clienteRepository.save(any(ClienteEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
+        ClienteResponseDto responseDto = clienteService.atualizar(id, request);
+
+        assertNotNull(responseDto);
+        assertEquals(1, responseDto.getId());
+        assertEquals("Nome Novo", responseDto.getNome());
+        assertEquals("99999999", responseDto.getContato());
+
+        verify(clienteRepository).findById(id);
+        verify(clienteService).atualizar(id, request);
+
+    }
+
+    @Test
+    void deveLancarNotFoundExceptionAoNaoEncontrarCliente(){
+
+        Integer id = 1;
+
+        when(clienteRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> clienteRepository.findById(id));
+
+        verify(clienteRepository).findById(id);
+    }
+
+    @Test
+    void deveLancarBussinesExceptionSe_CPF_JaExiste(){
+
+        Integer id = 1;
+
+        ClienteEntity clienteExistente = new ClienteEntity();
+        clienteExistente.setId(id);
+        clienteExistente.setCpf("03309145107");
+
+        ClienteRequestDto request = new ClienteRequestDto();
+        request.setCpf("11122233344"); // CPF duplicado
+        request.setNome("Nome Atualizado");
+
+        when(clienteRepository.findById(id))
+                .thenReturn(Optional.of(clienteExistente));
+
+        when(clienteRepository.existsByCpfAndIdNot(request.getCpf(), id))
+                .thenReturn(true);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> clienteService.atualizar(id, request));
+
+        assertEquals("CPF já cadastrado", ex.getMessage());
+
+        verify(clienteRepository).findById(id);
+        verify(clienteRepository).existsByCpfAndIdNot(request.getCpf(), id);
+        verify(clienteRepository, never()).save(any());
+    }
 
 }
