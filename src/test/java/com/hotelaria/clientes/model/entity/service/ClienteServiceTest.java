@@ -161,18 +161,19 @@ class ClienteServiceTest {
         assertEquals("99999999", responseDto.getContato());
 
         verify(clienteRepository).findById(id);
-        verify(clienteService).atualizar(id, request);
 
     }
 
     @Test
-    void deveLancarNotFoundExceptionAoNaoEncontrarCliente(){
+    void deveLancarRuntimedExceptionAoNaoEncontrarCliente(){
 
         Integer id = 1;
 
         when(clienteRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> clienteRepository.findById(id));
+        assertThrows(NotFoundException.class,
+                () -> clienteService.buscarPorId(id));
+
 
         verify(clienteRepository).findById(id);
     }
