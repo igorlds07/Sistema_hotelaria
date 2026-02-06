@@ -1,6 +1,7 @@
 package com.hotelaria.quartos.model.entity.service;
 
 import com.hotelaria.exceptions.BusinessException;
+import com.hotelaria.exceptions.NotFoundException;
 import com.hotelaria.quartos.model.entity.QuartoEntity;
 import com.hotelaria.quartos.model.entity.StatusQuarto;
 import com.hotelaria.quartos.model.entity.dto.QuartoRequestDto;
@@ -13,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,11 +81,68 @@ class QuartoServiceTest {
     }
 
     @Test
-    void listarQuartos() {
+    void develistarQuartosComSucesso() {
+
+        Integer numQuarto = 25;
+
+        QuartoEntity quarto = new QuartoEntity();
+        quarto.setNumeroQuarto(numQuarto);
+        quarto.setValorDiaria(new BigDecimal(125));
+
+        when(quartoRepository.findAll()).thenReturn(List.of(quarto));
+
+        List<QuartoResponseDto> response = quartoService.listarQuartos();
+
+        assertEquals(1, response.size());
+        assertEquals(25, response.get(0).getNumeroQuarto());
+        assertEquals(new BigDecimal(125), response.get(0).getValorDiaria());
+
+        verify(quartoRepository).findAll();
+
     }
 
     @Test
-    void buscarQuartoEspecifio() {
+    void deveLancarUmaListaVaziaSeNaoHouverQuartos(){
+
+        when(quartoRepository.findAll()).thenReturn(List.of());
+
+        List<QuartoResponseDto> response = quartoService.listarQuartos();
+
+        assertNotNull(response);
+        assertTrue(response.isEmpty());
+
+        verify(quartoRepository).findAll();
+    }
+
+    @Test
+    void deveBuscarQuartoEspecifio() {
+
+        Integer numQuarto = 25;
+
+        QuartoEntity quarto = new QuartoEntity();
+        quarto.setNumeroQuarto(numQuarto);
+        quarto.setValorDiaria(new BigDecimal(125));
+        quarto.setStatusQuarto(StatusQuarto.DISPONIVEL);
+
+        when(quartoRepository.findByNumeroQuarto(numQuarto)).thenReturn(Optional.of(quarto));
+
+        QuartoResponseDto response = quartoService.buscarQuartoEspecifio(quarto.getNumeroQuarto());
+
+        assertEquals(25, response.getNumeroQuarto());
+
+        verify(quartoRepository).findByNumeroQuarto(numQuarto);
+    }
+
+    @Test
+    void deveLancarNotFoundException_QuandoQuartoNaoExistir(){
+
+        Integer numQuarto = 25;
+
+        when(quartoRepository.findByNumeroQuarto(numQuarto)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> quartoService.buscarQuartoEspecifio(numQuarto));
+
     }
 
     @Test
