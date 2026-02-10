@@ -146,7 +146,52 @@ class QuartoServiceTest {
     }
 
     @Test
-    void atualizarQuarto() {
+    void deveAtualizarQuartoComSucesso() {
+
+        Integer idQuarto = 1;
+        Integer numQuarto = 25;
+
+        QuartoEntity quarto = new QuartoEntity();
+        quarto.setId(idQuarto);
+        quarto.setNumeroQuarto(numQuarto);
+        quarto.setValorDiaria(new BigDecimal(125));
+        quarto.setStatusQuarto(StatusQuarto.DISPONIVEL);
+
+        QuartoRequestDto requestDto = new QuartoRequestDto();
+        requestDto.setValorDiaria(new BigDecimal(130));
+        requestDto.setNumeroQuarto(26);
+
+        when(quartoRepository.findByNumeroQuarto(numQuarto)).thenReturn(Optional.of(quarto));
+        when(quartoRepository.save(any(QuartoEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        QuartoResponseDto response = quartoService.atualizarQuarto(numQuarto, requestDto);
+
+        assertNotNull(response);
+        assertEquals(26, response.getNumeroQuarto());
+        assertEquals(new BigDecimal(130), response.getValorDiaria());
+
+        verify(quartoRepository).findByNumeroQuarto(numQuarto);
+        verify(quartoRepository).save(any(QuartoEntity.class));
+    }
+
+    @Test
+    void deveLancarNotFoundEcpetionSeQuartoNaoEncontrado(){
+
+        Integer numQuarto = 25;
+        QuartoRequestDto request = new QuartoRequestDto();
+        request.setNumeroQuarto(26);
+        request.setValorDiaria(new BigDecimal("130"));
+
+        when(quartoRepository.findByNumeroQuarto(numQuarto))
+                .thenReturn(Optional.empty());
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> quartoService.atualizarQuarto(numQuarto, request));
+
+        assertEquals("Quarto não encontrado!", ex.getMessage());
+
+        verify(quartoRepository).findByNumeroQuarto(numQuarto);
+        verify(quartoRepository, never()).save(any());
     }
 
     @Test
