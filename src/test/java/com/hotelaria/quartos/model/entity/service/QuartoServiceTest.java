@@ -175,7 +175,7 @@ class QuartoServiceTest {
     }
 
     @Test
-    void deveLancarNotFoundEcpetionSeQuartoNaoEncontrado(){
+    void deveLancarNotFoundExcpetionSeQuartoNaoEncontrado(){
 
         Integer numQuarto = 25;
         QuartoRequestDto request = new QuartoRequestDto();
@@ -195,6 +195,57 @@ class QuartoServiceTest {
     }
 
     @Test
-    void deletar() {
+    void deletarUmQuartoComSucesso() {
+
+        Integer idQuarto = 1;
+        Integer numQuarto = 25;
+
+        QuartoEntity quarto = new QuartoEntity();
+        quarto.setId(idQuarto);
+        quarto.setNumeroQuarto(numQuarto);
+        quarto.setValorDiaria(new BigDecimal("125"));
+
+        when(quartoRepository.findById(idQuarto)).thenReturn(Optional.of(quarto));
+        quartoService.deletar(idQuarto);
+
+        verify(quartoRepository).findByNumeroQuarto(numQuarto);
+
+    }
+    @Test
+    void deveLancarNotFoundExceptionSeQuartoNaoEncontrado(){
+
+        Integer idQuarto = 1;
+
+        when(quartoRepository.findById(idQuarto)).thenReturn(Optional.empty());
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> quartoService.deletar(idQuarto));
+
+        assertEquals("Quarto não encontrado!", ex.getMessage());
+
+        verify(quartoRepository).findById(idQuarto);
+    }
+    @Test
+    void deveLnacarBusinessExceptionAoTentarDeletarQuartoOcuopado(){
+
+        Integer id = 1;
+        Integer numQuarto = 25;
+
+        QuartoEntity quarto = new QuartoEntity();
+        quarto.setId(id);
+        quarto.setNumeroQuarto(numQuarto);
+        quarto.setStatusQuarto(StatusQuarto.OCUPADO);
+
+        when(quartoRepository.findById(id)).thenReturn(Optional.of(quarto));
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> quartoService.deletar(id));
+
+        assertEquals("Não é possível deletar um quarto ocupado.", ex.getMessage());
+
+
+        verify(quartoRepository).findById(id);
+        verify(quartoRepository, never()).delete(any());
+        verify(quartoRepository, never()).deleteById(any());
     }
 }
