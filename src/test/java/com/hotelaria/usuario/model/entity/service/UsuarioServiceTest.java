@@ -1,5 +1,6 @@
 package com.hotelaria.usuario.model.entity.service;
 
+import com.hotelaria.exceptions.BusinessException;
 import com.hotelaria.usuario.model.entity.Perfil;
 import com.hotelaria.usuario.model.entity.UsuarioEntity;
 import com.hotelaria.usuario.model.entity.dto.UsuarioRequestDto;
@@ -12,10 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioServiceTest {
@@ -51,6 +53,28 @@ class UsuarioServiceTest {
 
 
         verify(usuarioRepository).save(any(UsuarioEntity.class));
+
+    }
+    @Test
+    void deveLancarBusinessExceptionSeEmailJaExistente(){
+
+        String emailExistente = "igor@gmail.com";
+
+        UsuarioRequestDto usuario = new UsuarioRequestDto();
+        usuario.setEmail(emailExistente);
+
+        UsuarioEntity usuarioEmailExistente = new UsuarioEntity();
+        usuarioEmailExistente.setEmail(emailExistente);
+
+        when(usuarioRepository.existsByEmail(emailExistente)).thenReturn(true);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> usuarioService.criar(usuario));
+
+        verify(usuarioRepository).existsByEmail(emailExistente);
+        assertEquals("Email existente!", ex.getMessage());
+
+        verify(usuarioRepository, never()).save(any());
 
     }
 
