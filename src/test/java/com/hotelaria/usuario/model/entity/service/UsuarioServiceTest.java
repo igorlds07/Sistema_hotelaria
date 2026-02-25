@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,11 +80,57 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void listar() {
+    void listarTodosOsUsuariosCadastrados() {
+
+        UsuarioEntity usuario = new UsuarioEntity();
+        usuario.setNome("Nome Teste");
+        usuario.setCpf("03309145107");
+
+        when(usuarioRepository.findAll()).thenReturn(List.of(usuario));
+
+        List <UsuarioResponseDto> response = usuarioService.listar();
+
+        assertEquals(1, response.size());
+        assertEquals("Nome Teste", response.get(0).getNome());
+        assertEquals("03309145107", response.get(0).getCpf());
+
+        verify(usuarioRepository).findAll();
+
+    }
+    @Test
+    void deveRetornarUmaListaVazia(){
+
+        when(usuarioRepository.findAll()).thenReturn(List.of());
+
+        List<UsuarioResponseDto> response = usuarioService.listar();
+
+        assertNotNull(response);
+        assertTrue(response.isEmpty());
+
     }
 
     @Test
-    void buscarUsuarios() {
+    void deveBuscarUmUsuarioComSucesso() {
+
+        Integer id = 1;
+
+        UsuarioEntity usuario = new UsuarioEntity();
+        usuario.setId(id);
+        usuario.setNome("Nome Teste");
+        usuario.setCpf("03309145107");
+
+        when(usuarioRepository.findById(id)).thenReturn(Optional.of(usuario));
+
+        UsuarioResponseDto response = usuarioService.buscarUsuarios(id);
+
+        assertEquals(1, response.getId());
+        assertEquals("Nome Teste", response.getNome());
+        assertEquals("03309145107", response.getCpf());
+
+    }
+    @Test
+    void deveLancarNotFoundExceptionSeNaoEncontrarUsuario(){
+        
     }
 
     @Test
