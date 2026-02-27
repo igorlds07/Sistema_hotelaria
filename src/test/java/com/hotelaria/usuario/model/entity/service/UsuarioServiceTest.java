@@ -1,6 +1,7 @@
 package com.hotelaria.usuario.model.entity.service;
 
 import com.hotelaria.exceptions.BusinessException;
+import com.hotelaria.exceptions.NotFoundException;
 import com.hotelaria.usuario.model.entity.Perfil;
 import com.hotelaria.usuario.model.entity.UsuarioEntity;
 import com.hotelaria.usuario.model.entity.dto.UsuarioRequestDto;
@@ -130,11 +131,44 @@ class UsuarioServiceTest {
     }
     @Test
     void deveLancarNotFoundExceptionSeNaoEncontrarUsuario(){
-        
+
+        Integer id = 1;
+
+        when(usuarioRepository.findById(id)).thenReturn(Optional.empty());
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> usuarioService.buscarUsuarios(id));
+
+        //UsuarioResponseDto response = usuarioService.buscarUsuarios(id);
+
+        assertEquals("Usuário não encontrado", ex.getMessage());
+
+        verify(usuarioRepository).findById(id);
+        verify(usuarioRepository, never()).save(any());
+
     }
 
     @Test
-    void atualizar() {
+    void deveAtualizarUsuarioComSucesso() {
+
+        Integer id = 1;
+
+        UsuarioEntity usuario = new UsuarioEntity();
+        usuario.setId(id);
+        usuario.setNome("Nome Teste");
+
+        UsuarioRequestDto usuarioAtualizar = new UsuarioRequestDto();
+        usuarioAtualizar.setNome("Novo Nome Teste");
+
+        when(usuarioRepository.findById(id)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.save(any(UsuarioEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        UsuarioResponseDto response = usuarioService.atualizar(id, usuarioAtualizar);
+
+        assertEquals("Novo Nome Teste", response.getNome());
+
+        verify(usuarioRepository).findById(id);
+        verify(usuarioRepository).save(any());
     }
 
     @Test
