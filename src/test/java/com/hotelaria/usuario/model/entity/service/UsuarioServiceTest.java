@@ -172,6 +172,34 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void deletar() {
+    void deveDeletarUmUsuarioComSucesso() {
+
+        Integer id = 1;
+
+        UsuarioEntity usuario = new UsuarioEntity();
+        usuario.setId(id);
+        usuario.setNome("Nome Teste");
+
+        when(usuarioRepository.findById(id)).thenReturn(Optional.of(usuario));
+
+        usuarioService.deletar(id);
+
+        assertEquals(1, usuario.getId());
+        assertEquals("Nome Teste", usuario.getNome());
+
+        verify(usuarioRepository).findById(id);
+        verify(usuarioService).deletar(any());
+
+    }
+    @Test
+    void deveRetornarNuloSeNaoEncontrarUsuario(){
+
+        Integer id = 1;
+
+        when(usuarioRepository.findById(id)).thenReturn(Optional.empty());
+
+        usuarioService.deletar(id);
+
+        verify(usuarioRepository).findById(id);
     }
 }
